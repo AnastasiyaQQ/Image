@@ -128,7 +128,9 @@ namespace Image
             MessageBox.Show("Введите запрос ._.");
         }
 
-      
-
+        private void label2_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Да это я я хе)");
+        }
     }
 }
