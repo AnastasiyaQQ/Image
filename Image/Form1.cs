@@ -12,7 +12,7 @@ namespace Image
         private string _apiKey = "QTc5CKxwobr8-IBqYZTP6ItE-ID_8QxyI5_eBiSgQa0";
         private string _apiUrl = "https://api.unsplash.com/photos/random";
         private readonly HttpClient _httpClient = new HttpClient();
-
+        private string _currentImageUrl;
         public Form1()
         {
             InitializeComponent();
@@ -44,7 +44,39 @@ namespace Image
                 MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
+        private async void button2_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(_currentImageUrl))
+            {
+                MessageBox.Show("Нет изображения для скачивания.");
+                return;
+            }
 
+            using (SaveFileDialog dialog = new SaveFileDialog())
+            {
+                dialog.Filter = "Изображения (*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp|Все файлы (*.*)|*.*";
+                dialog.FilterIndex = 1;
+                dialog.RestoreDirectory = true;
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        byte[] imageBytes = await _httpClient.GetByteArrayAsync(_currentImageUrl);
+                        using (FileStream fs = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
+                        {
+                            await fs.WriteAsync(imageBytes, 0, imageBytes.Length);
+                        }
+                        MessageBox.Show("Изображение успешно сохранено.");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при сохранении изображения: {ex.Message}");
+                    }
+                }
+
+            }
+        }
         private async Task<string> GetRandomImageUrl(string query)
         {
             try
@@ -94,6 +126,7 @@ namespace Image
                         {
                             System.Drawing.Image image = System.Drawing.Image.FromStream(stream);
                             picImage.Image = image;
+                            _currentImageUrl = imageUrl;
                         }
                         catch (Exception ex)
                         {
@@ -111,6 +144,7 @@ namespace Image
                 MessageBox.Show($"Ошибка загрузки изображения: {ex.Message}");
             }
         }
+
 
         private bool IsValidUrl(string url)
         {
@@ -132,5 +166,8 @@ namespace Image
         {
             MessageBox.Show("Да это я я хе)");
         }
+
+       
     }
 }
+
